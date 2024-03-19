@@ -162,7 +162,7 @@ tbody :hover {
     font-size: 14px;
   }
   .pagination button{
-    padding: 5px 5px;
-    margin: 0 2px;
+    padding: 7px 7px;
+    margin: 0 3px;
   }
 }
