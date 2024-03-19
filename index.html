@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="styles.css" />
+    <title>Product Details</title>
+  </head>
+  <body>
+    <h1>Product Details</h1>
+    <div id="errorMessage"></div>
+    <div id="loader">
+      <div class="spinner"></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Image</th>
+          <th>Title</th>
+          <th>Category</th>
+          <!-- <th>Description</th> -->
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <!-- Table rows will be created here -->
+      </tbody>
+    </table>
+    <div class="PageButton">
+      <div class="pagination">
+        <button
+          id="prevBtn"
+          disabled>
+          Previous
+        </button>
+        <span id="pageNumbers"></span>
+        <button id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          const loader = document.getElementById('loader');
+          loader.style.display = 'block';
+
+          const response = await fetch('https://fakestoreapi.com/product');
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
+
+          const data = await response.json();
+          // console.log(data);
+
+          const productTableBody = document.getElementById('productTableBody');
+          const pagination = document.getElementsByClassName('pagination');
+          const pageNumbers = document.getElementById('pageNumbers');
+          const prevBtn = document.getElementById('prevBtn');
+          const nextBtn = document.getElementById('nextBtn');
+          const errorMessage = document.getElementById('errorMessage');
+          const itemsPerPage = 5;
+          let currentPage = 1;
+
+          //Display the new table row
+          function displayData() {
+            productTableBody.innerHTML = '';
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const displayedData = data.slice(startIndex, endIndex);
+            displayedData.forEach((product) => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td><strong>${product.id}</strong></td>
+                <td><img src="${product.image}" alt="product"> </td>
+                <td><strong>${product.title}</strong></td>
+                <td>${product.category}</td>
+                <td><strong>${product.price}</strong></td>
+              `;
+              productTableBody.appendChild(row);
+            });
+
+            //Buttons show when data is fetched
+            pagination[0].style.display = 'block';
+            // Enable/disable pagination buttons based on current page
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = endIndex >= data.length;
+          }
+
+          function paginationButtons() {
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+            const pageNumbersContainer = pageNumbers;
+            pageNumbersContainer.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+              const button = document.createElement('button');
+              button.textContent = i;
+              if (i === currentPage) {
+                button.classList.add('active');
+              }
+              button.addEventListener('click', () => {
+                currentPage = i;
+                displayData();
+                updateActiveButton(i);
+              });
+              pageNumbersContainer.appendChild(button);
+            }
+          }
+
+          function updateActiveButton(activePage) {
+            const buttons = document.querySelectorAll('.pagination button');
+            buttons.forEach((button) => {
+              button.classList.remove('active');
+              if (parseInt(button.textContent) === activePage) {
+                button.classList.add('active');
+              }
+            });
+          }
+          displayData();
+          paginationButtons();
+          loader.style.display = 'none';
+          document.querySelector('table').style.display = 'table';
+
+          prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+              currentPage--;
+              displayData();
+              updateActiveButton(currentPage);
+            }
+          });
+          nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(data.length / itemsPerPage);
+            if (currentPage < totalPages) {
+              currentPage++;
+              displayData();
+              updateActiveButton(currentPage);
+            }
+          });
+        } catch (error) {
+          error = 'Something went wrong....';
+          console.error('Error fetching data:', error);
+          errorMessage.innerText = error;
+        }
+      });
+    </script>
+  </body>
+</html>
