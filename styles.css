@@ -159,7 +159,7 @@ tbody :hover {
     content: 'Price' ' : ';
   }
   #errorMessage {
-    font-size: 14px;
+    font-size: 13px;
   }
   .pagination button{
     padding: 7px 7px;
